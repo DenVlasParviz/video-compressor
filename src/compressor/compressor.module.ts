@@ -4,6 +4,6 @@ import { CompressorService } from './compressor.service';
 
 @Module({
   controllers: [CompressorController],
-  providers: [CompressorService]
+  providers: [CompressorService],
 })
 export class CompressorModule {}

@@ -5,11 +5,9 @@ import { CompressorController } from './compressor/compressor.controller';
 import { AppService } from './app.service';
 import { CompressorService } from './compressor/compressor.service';
 
-
-
 @Module({
   imports: [],
   controllers: [AppController, CompressorController],
-  providers: [AppService,CompressorService],
+  providers: [AppService, CompressorService],
 })
 export class AppModule {}
