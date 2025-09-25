@@ -69,7 +69,7 @@ export class CompressorService {
         return Math.max(16, Math.floor(videoKbps));
     }
 
-    private encodeVideo(input: string, output: string, videoSize: number) {
+    private encodeVideo(input: string, output: string, videoSize: number, secondPass: boolean = false) {
         return new Promise((resolve, reject) => {
             const logFile = `ffmpeg2pass-${Date.now()}`;
             const tmpPass = path.join(
@@ -91,41 +91,50 @@ export class CompressorService {
                     }
                 })
                 .on('end', () => {
-                    console.log('! First pass completed, starting second pass');
-                    ffmpeg(input)
-                        .videoCodec('libx264')
-                        .videoBitrate(videoSize)
-                        .audioCodec('aac')
-                        .audioBitrate('128k')
-                        .outputOptions([
-                            '-pass 2',
-                            '-movflags +faststart',
-                            '-tune film',
-                            '-y',
-                            '-profile:v high',
-                            `-passlogfile ${logFile}`
-                        ])
-                        .on('progress', (progress) => {
-                            if (progress.percent) {
-                                console.log(`progress pass 2: ${progress.percent.toFixed(2)}% done`);
+                    console.log('! First pass completed!');
+                    if (secondPass) {
+                        console.log('! starting second pass');
 
-                            }
-                        })
+                        ffmpeg(input)
+                            .videoCodec('libx264')
+                            .videoBitrate(videoSize)
+                            .audioCodec('aac')
+                            .audioBitrate('128k')
+                            .outputOptions([
+                                '-pass 2',
+                                '-movflags +faststart',
+                                '-tune film',
+                                '-y',
+                                '-profile:v high',
+                                `-passlogfile ${logFile}`
+                            ])
+                            .on('progress', (progress) => {
+                                if (progress.percent) {
+                                    console.log(`progress pass 2: ${progress.percent.toFixed(2)}% done`);
 
-                        .on('end', () => {
-                            console.log('! Done pass 2');
-                            this.cleanupLogFiles(logFile)
+                                }
+                            })
 
+                            .on('end', () => {
+                                console.log('! Done pass 2');
+                                this.cleanupLogFiles(logFile)
+
+                                resolve(output);
+
+                            })
+
+                            .on('error', (err: Error) => {
+                                console.error('Second pass error:', err);
+                                this.cleanupLogFiles(logFile);
+                                reject(err);
+                            })
+                            .save(output);
+                    } else {
+                        ffmpeg(input).save(output)
+                        this.cleanupLogFiles(logFile)
                             resolve(output);
+                    }
 
-                        })
-
-                        .on('error', (err: Error) => {
-                            console.error('Second pass error:', err);
-                            this.cleanupLogFiles(logFile);
-                            reject(err);
-                        })
-                        .save(output);
 
                 })
                 .on('error', (err: Error) => {
