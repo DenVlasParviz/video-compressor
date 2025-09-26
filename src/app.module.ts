@@ -4,9 +4,16 @@ import { CompressorController } from './compressor/compressor.controller';
 
 import { AppService } from './app.service';
 import { CompressorService } from './compressor/compressor.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'node:path';
 
 @Module({
-  imports: [],
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'test-files'),
+      serveRoot: '/static',
+    }),
+  ],
   controllers: [AppController, CompressorController],
   providers: [AppService, CompressorService],
 })
