@@ -1,17 +1,18 @@
 import {
-  Controller,
-  Post,
-  Body,
-  UseInterceptors,
+    Controller,
+    Post,
+    Body,
+    UseInterceptors,
 
-  BadRequestException,
-  UploadedFile,
+    BadRequestException,
+    UploadedFile, Query,
 } from '@nestjs/common';
 import type { Express } from 'express';
 import { CompressorService } from './compressor.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'node:path';
+import {CompressDto} from "./compressor-dto";
 
 @Controller('compressor')
 export class CompressorController {
@@ -36,9 +37,10 @@ export class CompressorController {
   )
   async compress(
     @UploadedFile() file: Express.Multer.File,
-    @Body('targetSize') targetSize: string,
+    @Query('targetSize') targetSize: string,
   ) {
     try {
+
       if (!file) {
         throw new BadRequestException('File is required');
       }
