@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   UseInterceptors,
   BadRequestException,
   UploadedFile,
@@ -12,7 +11,7 @@ import { CompressorService } from './compressor.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'node:path';
-import { CompressDto } from './compressor-dto';
+
 
 @Controller('compressor')
 export class CompressorController {
