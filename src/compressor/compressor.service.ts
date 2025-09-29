@@ -70,10 +70,10 @@ export class CompressorService {
     input: string,
     output: string,
     videoSize: number,
-    secondPass: boolean = false,
+
   ) {
     return new Promise((resolve, reject) => {
-      const logFile = `ffmpeg2pass-${Date.now()}`;
+
       const tmpPass = path.join(
         path.dirname(output),
         `ffpass-${Date.now()}.mp4`,
@@ -85,8 +85,8 @@ export class CompressorService {
         .audioCodec('aac')
         .audioBitrate('128k')
         .outputOptions([
-          '-preset medium',
-
+          '-preset ultrafast','-maxrate 1000k',
+          '-bufsize 2000k',
           '-movflags +faststart',
           '-profile:v high',
           '-y',
@@ -144,7 +144,7 @@ export class CompressorService {
     }
   }
 
-  private cleanupLogFiles(logFile: string): void {
+ /* private cleanupLogFiles(logFile: string): void {
     const logFiles = [`${logFile}-0.log`, `${logFile}-0.log.mbtree`];
 
     logFiles.forEach((file) => {
@@ -158,7 +158,7 @@ export class CompressorService {
       }
     });
   }
-
+*/
   private async getDuration(filePath: string): Promise<number> {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(filePath, (err: Error, metadata: VideoMetadata) => {
