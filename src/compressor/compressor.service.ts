@@ -4,7 +4,9 @@ import ffmpegPath from 'ffmpeg-static';
 import ffprobeStatic from 'ffprobe-static';
 import { Express } from 'express';
 import path from 'node:path';
+const FormData = require('form-data');
 import * as fs from 'node:fs';
+import axios from "axios";
 
 interface VideoMetadata {
   format: {
@@ -38,14 +40,14 @@ export class CompressorService {
       const outputPath = path.join('test-files', uniqueFileName);
       console.log('outputPath', outputPath);
       await this.encodeVideo(file.path, outputPath, bitrate);
+      const videoLink = await this.sendToBot(outputPath,uniqueFileName);
       setTimeout(() => {
         this.cleanupFile(file.path);
       }, 5000);
       console.log('video is done');
       return {
         message: 'Video compressed successfully',
-        outputPath: outputPath,
-        fileName: uniqueFileName,
+        videoLink:videoLink,
       };
     } catch (err) {
       throw new BadRequestException(err.message);
@@ -158,7 +160,7 @@ export class CompressorService {
       }
     });
   }
-*/
+TODO: fix deleting logs file*/
   private async getDuration(filePath: string): Promise<number> {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(filePath, (err: Error, metadata: VideoMetadata) => {
@@ -170,5 +172,21 @@ export class CompressorService {
         resolve(duration);
       });
     });
+  }
+  private async sendToBot(filePath:string,fileName:string) {
+
+      const formData = new FormData();
+
+formData.append('video',fs.createReadStream(filePath),{filename:fileName});
+try{
+    const response = await axios.post('http://localhost:3002/api/send-video',formData,{
+        headers:formData.getHeaders(),
+    });
+    const fileUrl:string = response.data.fileUrl;
+    return fileUrl;
+}catch(err){
+    return Promise.reject(err);
+}
+
   }
 }
