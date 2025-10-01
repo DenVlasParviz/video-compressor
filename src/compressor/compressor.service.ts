@@ -179,7 +179,7 @@ TODO: fix deleting logs file*/
 
 formData.append('video',fs.createReadStream(filePath),{filename:fileName});
 try{
-    const response = await axios.post(`${process.env.BACKEND_URL}/api/send-video`,formData,{
+    const response = await axios.post(`${process.env.BOT_URL}/api/send-video`,formData,{
         headers:formData.getHeaders(),
     });
     const fileUrl:string = response.data.fileUrl;
